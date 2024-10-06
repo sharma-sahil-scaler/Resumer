@@ -9,10 +9,27 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
-  
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+
   backend:
     build: ./backend
     ports:
       - "8000:8000"
     volumes:
       - ./backend:/app
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=mongodb://db:27017/fomo_resume_builder
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  db:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - db_data:/data/db
+
+volumes:
+  db_data:
