@@ -10,3 +10,5 @@ pydantic[dotenv]
 fastapi-jwt-auth==0.5.0
 python-multipart==0.0.6
 pymongo
+openai
+jinja2==3.1.2  # Add the specific version you want or just use jinja2

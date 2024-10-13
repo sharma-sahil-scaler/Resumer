@@ -33,7 +33,7 @@ type Resume = {
   skills: string[]
 }
 
-export default function ResumeBuilderForm({ onSubmit }) {
+export default function ProfileForm({ onSubmit }) {
   const [resume, setResume] = useState<Resume>({
     name: '',
     email: '',

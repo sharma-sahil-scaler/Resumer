@@ -1,67 +1,53 @@
-import React, { useEffect, useState } from 'react'
-import ProfileForm from './components/ProfileForm'
-import './App.css'
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import axios from "axios";
+import ProfileForm from "./components/ProfileForm";
+import "./App.css";
 
 const App: React.FC = () => {
-  const [profiles, setProfiles] = useState<any[]>([])
-  const [editingProfile, setEditingProfile] = useState<any | null>(null)
-
-  const fetchProfiles = async () => {
-    const response = await fetch('http://localhost:8000/api/profile')
-    const data = await response.json()
-    setProfiles(data)
-  }
-
-  useEffect(() => {
-    fetchProfiles()
-  }, [])
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [resumeContent, setResumeContent] = useState<string | null>(null); // State to store resume content
 
   const handleCreateOrUpdateProfile = async (profile: any) => {
     try {
-      if (editingProfile) {
-        // Update existing profile
-        await fetch(`http://localhost:8000/api/profile/${editingProfile.id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(profile),
-        });
-      } else {
-        // Create new profile
-        await fetch('http://localhost:8000/api/profile', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(profile),
-        });
-      }
-      setEditingProfile(null);
-      fetchProfiles();
+      const response = await axios.post(
+        "http://localhost:8000/api/profile",
+        profile
+      );
+
+      const profileId = response.data._id;
+
+      const resumeResponse = await axios.get(
+        `http://localhost:8000/api/resume/${profileId}`
+      );
+
+      setResumeContent(resumeResponse.data);
+      setIsSubmitted(true);
     } catch (error) {
-      console.error('Error creating/updating profile:', error);
+      console.error("Error creating/updating profile:", error);
     }
   };
 
-  const handleDeleteProfile = async (id: string) => {
-    await fetch(`http://localhost:8000/api/profile/${id}`, {
-      method: 'DELETE',
-    })
-    fetchProfiles()
-  }
-
-  const handleEditProfile = (profile: any) => {
-    setEditingProfile(profile)
-  }
-
   return (
-    <div>
-      <h1>User Profiles</h1>
-      <ProfileForm onSubmit={handleCreateOrUpdateProfile} />
-      {/* <ProfileList profiles={profiles} onDelete={handleDeleteProfile} onEdit={handleEditProfile} /> */}
-    </div>
-  )
-}
+    <div className="flex min-h-screen">
+      <motion.div
+        className="w-full lg:w-1/2 p-6 overflow-y-auto mx-auto"
+        animate={{ x: isSubmitted ? '-25%' : 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <ProfileForm onSubmit={handleCreateOrUpdateProfile} />
+      </motion.div>
 
-export default App
+      <AnimatePresence>
+        {isSubmitted && (
+          <div className="flex flex-col w-full lg:w-1/2 p-6 overflow-y-auto mx-auto">
+            <h2 className="text-3xl font-bold mb-4">Your Resume</h2>
+            <div className="whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: resumeContent }} />
+          </div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+export default App;
