@@ -1,17 +1,27 @@
 from fastapi import FastAPI
-from motor.motor_asyncio import AsyncIOMotorClient
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.config import settings
+from app.routers import profile
 
 app = FastAPI()
 
-@app.on_event("startup")
-async def startup_db_client():
-    app.mongodb_client = AsyncIOMotorClient("mongodb://db:27017")
-    app.mongodb = app.mongodb_client["fomo_resume_builder"]
+origins = [
+    settings.CLIENT_ORIGIN,
+]
 
-@app.on_event("shutdown")
-async def shutdown_db_client():
-    app.mongodb_client.close()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-@app.get("/")
-async def root():
-    return {"message": "Hello! Ok"}
+
+app.include_router(profile.router, tags=['Profile'], prefix='/api/profile')
+
+
+@app.get("/api/healthchecker")
+def root():
+    return {"message": "Welcome to FastAPI with MongoDB"}
