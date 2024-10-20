@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import ProfileForm from "./components/ProfileForm";
@@ -6,7 +6,17 @@ import "./App.css";
 
 const App: React.FC = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [resumeContent, setResumeContent] = useState<string | null>(null); // State to store resume content
+  const iframeRef = useRef(null);
+  const [resumeHtml, setResumeHtml] = useState('');
+
+  useEffect(() => {
+    if (iframeRef.current && resumeHtml) {
+      const iframeDoc = iframeRef.current.contentDocument;
+      iframeDoc.open();
+      iframeDoc.write(resumeHtml);
+      iframeDoc.close();
+    }
+  }, [resumeHtml]);
 
   const handleCreateOrUpdateProfile = async (profile: any) => {
     try {
@@ -21,7 +31,7 @@ const App: React.FC = () => {
         `http://localhost:8000/api/resume/${profileId}`
       );
 
-      setResumeContent(resumeResponse.data);
+      setResumeHtml(resumeResponse.data);
       setIsSubmitted(true);
     } catch (error) {
       console.error("Error creating/updating profile:", error);
@@ -42,7 +52,11 @@ const App: React.FC = () => {
         {isSubmitted && (
           <div className="flex flex-col w-full lg:w-1/2 p-6 overflow-y-auto mx-auto">
             <h2 className="text-3xl font-bold mb-4">Your Resume</h2>
-            <div className="whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: resumeContent }} />
+            <iframe 
+              ref={iframeRef} 
+              style={{ width: '100%', height: '100%', border: '1px solid #ccc' }}
+              title="Resume Preview"
+            />
           </div>
         )}
       </AnimatePresence>

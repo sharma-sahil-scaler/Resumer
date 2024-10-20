@@ -10,7 +10,6 @@ class ResumeService:
         self.profile_service = ProfileService()
 
     async def generate_resume(self, profile_id: str) -> str:
-        logging.info(f"Fetching profile for ID: {profile_id}")  # Log the profile ID
         user_profile: UserProfile = await self.profile_service.get_profile(profile_id)
 
         if user_profile is None:
@@ -31,6 +30,7 @@ class ResumeService:
             education=user_profile.education,
             experience=user_profile.work_experience,
             skills=user_profile.skills,
+            summary=user_profile.summary
         )
 
         return resume_html

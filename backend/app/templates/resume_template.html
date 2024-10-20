@@ -1,35 +1,122 @@
-<!-- app/templates/resume_template.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ name }}'s Resume</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #2980b9;
+            border-bottom: 1px solid #bdc3c7;
+            padding-bottom: 5px;
+            margin-top: 30px;
+        }
+        .contact-info {
+            background-color: #ecf0f1;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .contact-info p {
+            margin: 5px 0;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        .job-title, .edu-degree {
+            font-weight: bold;
+            color: #34495e;
+        }
+        .job-company, .edu-institution {
+            font-style: italic;
+            color: #7f8c8d;
+        }
+        .job-date, .edu-date {
+            font-size: 0.9em;
+            color: #95a5a6;
+        }
+        .skills-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            list-style-type: none;
+            padding: 0;
+        }
+        .skills-list li {
+            background-color: #3498db;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+    </style>
 </head>
 <body>
-    <h1>{{ name }}</h1>
-    <p>Email: {{ email }}</p>
-    <p>Phone: {{ phone }}</p>
-    
-    <h2>Education</h2>
-    <ul>
+    <div class="container">
+        <h1>{{ name }}</h1>
+        <div class="contact-info">
+            <p>Email: {{ email }} | Phone: {{ phone }}</p>
+        </div>
+        
+        <h2>Summary</h2>
+        <p>{{ summary }}</p>
+        
+        <h2>Work Experience</h2>
+        <ul>
+        {% for job in experience %}
+            <li>
+                <div class="job-title">{{ job.position }}</div>
+                <div class="job-company">{{ job.company }}</div>
+                <div class="job-date">{{ job.start_date }} - {{ job.end_date }}</div>
+                <ul>
+                {% for responsibility in job.responsibilities %}
+                    <li>{{ responsibility }}</li>
+                {% endfor %}
+                </ul>
+            </li>
+        {% endfor %}
+        </ul>
+        
+        <h2>Education</h2>
+        <ul>
         {% for edu in education %}
-            <li>{{ edu }}</li>
+            <li>
+                <div class="edu-degree">{{ edu.degree }} in {{ edu.field_of_study }}</div>
+                <div class="edu-institution">{{ edu.institution }}</div>
+                <div class="edu-date">{{ edu.start_date }} - {{ edu.end_date }}</div>
+            </li>
         {% endfor %}
-    </ul>
-
-    <h2>Experience</h2>
-    <ul>
-        {% for exp in experience %}
-            <li>{{ exp }}</li>
-        {% endfor %}
-    </ul>
-
-    <h2>Skills</h2>
-    <ul>
+        </ul>
+        
+        <h2>Skills</h2>
+        <ul class="skills-list">
         {% for skill in skills %}
             <li>{{ skill }}</li>
         {% endfor %}
-    </ul>
+        </ul>
+    </div>
 </body>
 </html>
