@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Trash2 } from "lucide-react";
+import axios from "axios";
 
 type Education = {
   institution: string;
@@ -34,7 +35,7 @@ type Resume = {
   skills: string[];
 };
 
-export default function ProfileForm({ onSubmit }) {
+export default function BasicInfo({ onSubmit }) {
   const [resume, setResume] = useState<Resume>({
     name: "John Doe", // Default name
     email: "john.doe@example.com", // Default email
@@ -202,15 +203,29 @@ export default function ProfileForm({ onSubmit }) {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log(JSON.stringify(resume, null, 2));
 
-    onSubmit();
+    try {
+      // API call to create profile
+      const profileResponse = await axios.post("http://localhost:8000/api/profile", resume);
+
+      const profileId = profileResponse?.data?._id;
+
+      // Fetch the resume template
+      const resumeResponse = await axios.get(`http://localhost:8000/api/resume/${profileId}`);
+      const resumeTemplate = resumeResponse.data;
+
+      if(resumeTemplate) onSubmit(resumeTemplate);
+
+    } catch (error) {
+      console.error("Error during API calls:", error);
+    }
   };
 
   return (
-    <Card>
+    <Card className="w-6/12">
       <CardContent>
         <h2 className="text-3xl font-bold mb-6 text-center text-primary">
           Let's Build Your Resume

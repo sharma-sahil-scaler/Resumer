@@ -8,6 +8,7 @@ import "./App.css";
 
 const App: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
+  const [resumeData, setResumeData] = useState('');
   const pageTransition = {
     type: "tween",
     ease: "anticipate",
@@ -25,6 +26,12 @@ const App: React.FC = () => {
     }
   }, [currentStep]);
 
+
+  const handleBasicInfoSubmit = useCallback((resumeData) => {
+    setResumeData(resumeData);
+    updateProgress();
+  }, [updateProgress]);
+
   return (
     <div>
       <Progress value={(currentStep / 2) * 100} className="w-full mb-8"  />
@@ -36,12 +43,12 @@ const App: React.FC = () => {
           exit="out"
           variants={pageVariants}
           transition={pageTransition}
-          className="flex-grow flex flex-col"
+          className="flex-grow flex flex-col items-center	"
         >
           {currentStep === 0 && (
-            <BasicInfo onSubmit={() => updateProgress()} />
+            <BasicInfo onSubmit={(data) => handleBasicInfoSubmit(data)} />
           )}
-          {currentStep === 1 && <Companion />}
+          {currentStep === 1 && <Companion {...{ resumeData }} />}
         </motion.div>
       </AnimatePresence>
     </div>
