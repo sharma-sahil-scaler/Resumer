@@ -35,13 +35,17 @@ type Resume = {
 
 export default function ProfileForm({ onSubmit }) {
   const [resume, setResume] = useState<Resume>({
-    name: '',
-    email: '',
-    phone: '',
-    summary: '',
-    education: [{ institution: '', degree: '', field_of_study: '', start_date: '', end_date: '' }],
-    work_experience: [{ company: '', position: '', start_date: '', end_date: '', responsibilities: [''] }],
-    skills: ['']
+    name: 'John Doe', // Default name
+    email: 'john.doe@example.com', // Default email
+    phone: '123-456-7890', // Default phone number
+    summary: 'Experienced software developer with a passion for building applications.', // Default summary
+    education: [
+      { institution: 'University of Example', degree: 'Bachelor of Science', field_of_study: 'Computer Science', start_date: '2015-09-01', end_date: '2019-06-01' }
+    ],
+    work_experience: [
+      { company: 'Example Corp', position: 'Software Engineer', start_date: '2019-07-01', end_date: '2022-12-01', responsibilities: ['Developed web applications', 'Collaborated with cross-functional teams'] }
+    ],
+    skills: ['JavaScript', 'React', 'Node.js'] // Default skills
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

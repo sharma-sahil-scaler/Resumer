@@ -22,9 +22,15 @@ class SuggestionService:
         user_text = f"Name: {user_profile.name}\nEmail: {user_profile.email}\nPhone: {user_profile.phone}\nSummary: {user_summary}\nSkills: {', '.join(user_skills)}\n\nWork Experience:\n{''.join(user_experience)}\nEducation:\n{''.join(user_education)}"
 
         # Prepare the prompt for the AI model
-        prompt = f"Based on the following user profile information, generate a list of 7 thought-provoking questions that highlight the skills, experiences, or industry trends the user may be missing out on. The questions should create a sense of FOMO (Fear of Missing Out) and encourage the user to reflect on their current skills and experiences compared to industry standards.\n\nInclude 2 specific questions related to their work experience with FastAPI and load testing, emphasizing the importance of these skills in the current job market.\n\nAdditionally, generate 3 questions that suggest emerging technologies, frameworks, or best practices that are gaining popularity in the industry and how they can benefit the user's career growth.\n\nUser Profile:\n{user_text}\n\nQuestions:"
+        prompt = f"Generate a list of 7 thought-provoking questions that highlight the skills, experiences, or industry trends the user may be missing out on. The questions should create a sense of FOMO (Fear of Missing Out) and encourage the user to reflect on their current skills and experiences compared to industry standards.\n\n" \
+                 f"Include 2 specific questions related to their work experience with FastAPI and load testing, emphasizing the importance of these skills in the current job market.\n\n" \
+                 f"Additionally, generate 3 questions that suggest emerging technologies, frameworks, or best practices that are gaining popularity in the industry and how they can benefit the user's career growth.\n\n" \
+                 f"User Profile:\n{user_text}\n\nQuestions: Please provide only the questions without any additional text."
 
         # Generate FOMO suggestions using the AI model
         fomo_suggestions = self.openai_service.generate_response(prompt)
 
-        return fomo_suggestions
+
+        questions = [question for question in fomo_suggestions.split('\n') if question.strip()]
+
+        return questions
