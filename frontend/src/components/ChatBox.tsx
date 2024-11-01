@@ -1,40 +1,62 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "./ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { User, Send } from "lucide-react";
+import axios from "axios";
 
 const ChatBox = () => {
   const [chatMessages, setChatMessages] = useState([
     {
       role: "assistant",
       content:
-        "Hi there! I'm your resume building companion. Let's start by focusing on your current or most recent job. What's your job title?"
-    }
+        "Hi there! I'm your resume building companion. I will help you make your resume more refined and industry-ready.",
+    },
   ]);
 
   const [userInput, setUserInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  
 
-  const handleChatSubmit = (e: React.FormEvent) => {
+  const handleChatSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (userInput.trim()) {
-      setChatMessages([...chatMessages, { role: "user", content: userInput }]);
+      // Add user message to chat
+      setChatMessages((prev) => [
+        ...prev,
+        { role: "user", content: userInput },
+      ]);
       setUserInput("");
       setIsTyping(true);
-      // Simulate companion response (in a real app, this would be handled by an AI)
-      setTimeout(() => {
-        setIsTyping(false);
+
+      try {
+        // Send user message to the backend
+        const response = await axios.post("http://localhost:8000/api/chat", {
+          message: userInput,
+        });
+
+        // Assuming the response contains the assistant's reply
+        const assistantMessage = response.data.reply;
+
+        // Add assistant's response to chat
+        setChatMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: assistantMessage },
+        ]);
+      } catch (error) {
+        console.error("Error sending message:", error);
+        // Optionally, handle error response
         setChatMessages((prev) => [
           ...prev,
           {
             role: "assistant",
-            content:
-              "Great! Can you tell me about your key responsibilities in this role? Try to be specific and use action verbs."
-          }
+            content: "Sorry, I couldn't process your request. Please try again.",
+          },
         ]);
-      }, 2000);
+      } finally {
+        setIsTyping(false);
+      }
     }
   };
 
@@ -79,7 +101,7 @@ const ChatBox = () => {
                       : "bg-muted rounded-e-xl rounded-es-xl"
                   }`}
                 >
-                  <p className="text-sm font-normal">{message.content}</p>
+                  <p className="text-sm font-normal text-left	">{message.content}</p>
                 </div>
               </div>
             </div>
