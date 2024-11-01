@@ -1,5 +1,5 @@
 from bson import ObjectId
-from ..models.profile import UserProfile
+from app.models.profile import UserProfile
 from app.database import db
 
 class ProfileService:

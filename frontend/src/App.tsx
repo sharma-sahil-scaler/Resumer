@@ -8,7 +8,7 @@ import "./App.css";
 
 const App: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [resumeData, setResumeData] = useState('');
+  const [profileData, setProfileData] = useState('');
   const pageTransition = {
     type: "tween",
     ease: "anticipate",
@@ -26,9 +26,8 @@ const App: React.FC = () => {
     }
   }, [currentStep]);
 
-
-  const handleBasicInfoSubmit = useCallback((resumeData) => {
-    setResumeData(resumeData);
+  const handleBasicInfoSubmit = useCallback((pD) => {
+    setProfileData(pD);
     updateProgress();
   }, [updateProgress]);
 
@@ -48,7 +47,7 @@ const App: React.FC = () => {
           {currentStep === 0 && (
             <BasicInfo onSubmit={(data) => handleBasicInfoSubmit(data)} />
           )}
-          {currentStep === 1 && <Companion {...{ resumeData }} />}
+          {currentStep === 1 && <Companion {...{ profileData }} />}
         </motion.div>
       </AnimatePresence>
     </div>

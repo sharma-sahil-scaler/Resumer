@@ -213,11 +213,13 @@ export default function BasicInfo({ onSubmit }) {
 
       const profileId = profileResponse?.data?._id;
 
-      // Fetch the resume template
       const resumeResponse = await axios.get(`http://localhost:8000/api/resume/${profileId}`);
-      const resumeTemplate = resumeResponse.data;
+      const resumeData = resumeResponse.data;
 
-      if(resumeTemplate) onSubmit(resumeTemplate);
+      if(resumeData) onSubmit({
+        profileId,
+        resumeData
+      });
 
     } catch (error) {
       console.error("Error during API calls:", error);

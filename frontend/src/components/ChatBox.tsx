@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardContent } from "./ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -6,57 +6,71 @@ import { Avatar, AvatarFallback } from "./ui/avatar";
 import { User, Send } from "lucide-react";
 import axios from "axios";
 
-const ChatBox = () => {
+const ChatBox = ({ profileId }) => {
   const [chatMessages, setChatMessages] = useState([
     {
       role: "assistant",
       content:
-        "Hi there! I'm your resume building companion. I will help you make your resume more refined and industry-ready.",
+        "Hi there! I'm your resume-building companion. I will help you make your resume more refined and industry-ready.",
     },
   ]);
-
   const [userInput, setUserInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  
+  const [socket, setSocket] = useState(null);
+  const [chatId, setChatId] = useState(null);
+  const chatEndRef = useRef(null);
 
-  const handleChatSubmit = async (e: React.FormEvent) => {
+  const startChat = useCallback(async () => {
+    if(!profileId) return;
+
+    const chatResponse = await axios.post('http://localhost:8000/api/chat/start-chat', { profile_id: profileId });
+    setChatId(chatResponse.data.chat_id);
+  }, [profileId])
+
+  useEffect(() => {
+    startChat();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Initialize WebSocket connection
+  useEffect(() => {
+    if (chatId) {
+      const ws = new WebSocket(`ws://localhost:8000/api/chat/companion/${chatId}`);
+      ws.onopen = () => console.log("Connected to chat WebSocket");
+      ws.onmessage = (event) => {
+        setIsTyping(false);
+        const message = event.data;
+        setChatMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: message },
+        ]);
+      };
+      ws.onclose = () => console.log("Disconnected from WebSocket");
+      ws.onerror = (error) => console.error("WebSocket error:", error);
+      
+      setSocket(ws);
+
+      return () => ws.close();
+    }
+  }, [chatId]);
+
+  // Auto-scroll to the latest message
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatMessages]);
+
+  // Send message via WebSocket
+  const handleChatSubmit = (e) => {
     e.preventDefault();
-    if (userInput.trim()) {
+    if (userInput.trim() && socket) {
       // Add user message to chat
       setChatMessages((prev) => [
         ...prev,
         { role: "user", content: userInput },
       ]);
+      socket.send(userInput); // Send message to the WebSocket server
       setUserInput("");
-      setIsTyping(true);
-
-      try {
-        // Send user message to the backend
-        const response = await axios.post("http://localhost:8000/api/chat", {
-          message: userInput,
-        });
-
-        // Assuming the response contains the assistant's reply
-        const assistantMessage = response.data.reply;
-
-        // Add assistant's response to chat
-        setChatMessages((prev) => [
-          ...prev,
-          { role: "assistant", content: assistantMessage },
-        ]);
-      } catch (error) {
-        console.error("Error sending message:", error);
-        // Optionally, handle error response
-        setChatMessages((prev) => [
-          ...prev,
-          {
-            role: "assistant",
-            content: "Sorry, I couldn't process your request. Please try again.",
-          },
-        ]);
-      } finally {
-        setIsTyping(false);
-      }
+      setIsTyping(true); // Show typing indicator for the assistant
     }
   };
 
@@ -101,7 +115,9 @@ const ChatBox = () => {
                       : "bg-muted rounded-e-xl rounded-es-xl"
                   }`}
                 >
-                  <p className="text-sm font-normal text-left	">{message.content}</p>
+                  <p className="text-sm font-normal text-left">
+                    {message.content}
+                  </p>
                 </div>
               </div>
             </div>
@@ -124,6 +140,7 @@ const ChatBox = () => {
               </div>
             </div>
           )}
+          <div ref={chatEndRef} />
         </div>
       </CardContent>
       <div className="p-4 border-t">
