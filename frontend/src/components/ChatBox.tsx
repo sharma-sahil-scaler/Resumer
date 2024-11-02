@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { User, Send } from "lucide-react";
 import axios from "axios";
+import Markdown from 'react-markdown'
 
 const ChatBox = ({ profileId }) => {
   const [chatMessages, setChatMessages] = useState([
@@ -116,7 +117,7 @@ const ChatBox = ({ profileId }) => {
                   }`}
                 >
                   <p className="text-sm font-normal text-left">
-                    {message.content}
+                    <Markdown>{message.content}</Markdown>
                   </p>
                 </div>
               </div>
